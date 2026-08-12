@@ -88,9 +88,9 @@ function Navbar() {
   const [open, setOpen] = useState(false);
   const links = [
     { label: "Features", href: "#features" },
-    { label: "FAQ", href: "#faq" },
     { label: "Events", href: "#events" },
     { label: "Roadmap & Voting", href: "#voting" },
+    { label: "FAQ", href: "#faq" },
     { label: "Contact", href: "#contact" },
   ];
   return (
@@ -130,38 +130,84 @@ function Navbar() {
 }
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
-function Hero() {
+function IosNotifyForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "duplicate" | "error">("idle");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("loading");
+    try {
+      const result = await api.addIosWaitlist(email);
+      setStatus(result === "duplicate" ? "duplicate" : "done");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  if (status === "done") {
+    return (
+      <p style={{ color: NAVY }} className="text-sm font-700">
+        ✓ You are on the list! We will let you know when iOS launches.
+      </p>
+    );
+  }
+
   return (
-    <section style={{ backgroundColor: BG, minHeight: "calc(100vh - 57px)" }} className="px-4 overflow-hidden flex items-center">
+    <form onSubmit={submit} className="flex flex-col gap-2 w-full max-w-sm">
+      <p style={{ color: NAVY }} className="text-xs font-700 opacity-60 uppercase tracking-wide">iOS — Coming Soon</p>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Your email address"
+          style={{ backgroundColor: "rgba(255,255,255,0.55)", color: NAVY, borderRadius: "0.75rem", border: "2px solid rgba(30,58,95,0.18)", flex: 1, minWidth: 0 }}
+          className="px-4 py-3 text-sm font-600 outline-none"
+        />
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          style={{ backgroundColor: NAVY, color: "white", borderRadius: "0.75rem", whiteSpace: "nowrap" }}
+          className="px-4 py-3 text-sm font-800 hover:opacity-85 transition-opacity disabled:opacity-50"
+        >
+          {status === "loading" ? "…" : "Notify me"}
+        </button>
+      </div>
+      {status === "duplicate" && <p style={{ color: NAVY }} className="text-xs font-700 opacity-60">You are already on the list!</p>}
+      {status === "error" && <p style={{ color: "#b91c1c" }} className="text-xs font-700">Something went wrong — please try again.</p>}
+    </form>
+  );
+}
+
+function Hero({ sectionRef }: { sectionRef?: React.RefObject<HTMLElement | null> }) {
+  const ctaRef = useRef<HTMLDivElement>(null);
+  return (
+    <section ref={sectionRef} style={{ backgroundColor: BG, minHeight: "calc(100vh - 57px)" }} className="px-4 overflow-hidden flex items-center">
       <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-8 items-center py-16">
         <div>
+          <p style={{ color: NAVY }} className="text-sm font-800 opacity-60 mb-3 uppercase tracking-widest">
+            Be among the first to master vocabulary the fun way
+          </p>
           <h1 style={{ color: NAVY, lineHeight: 1.15 }} className="text-4xl md:text-5xl font-900 mb-5">
             Master New Words Every Day with WordsWave.
           </h1>
           <p style={{ color: NAVY }} className="text-lg font-600 opacity-80 mb-8 leading-relaxed">
             Expand your vocabulary through daily word exposure, interactive quizzes, and a gamified learning experience alongside Fin, your dolphin guide!
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div ref={ctaRef} className="flex flex-col gap-4">
             <a
               href="https://play.google.com/store/apps/details?id=com.anyahuru.wordwave"
               target="_blank"
               rel="noopener noreferrer"
               style={{ backgroundColor: NAVY, color: "white" }}
-              className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-800 text-sm shadow-lg hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-800 text-sm shadow-lg hover:opacity-90 transition-opacity self-start"
             >
               <img src={googlePlayIcon} alt="Google Play" className="w-5 h-5 object-contain" />
               Get it on Google Play
             </a>
-            <button
-              disabled
-              style={{ borderColor: NAVY, color: NAVY }}
-              className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-800 text-sm border-2 opacity-50 cursor-not-allowed"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.18 1.27-2.16 3.8.03 3.02 2.65 4.03 2.68 4.04l-.07.28zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-              Coming Soon on Apple Store
-            </button>
+            <IosNotifyForm />
           </div>
         </div>
         {/* Phone mockup */}
@@ -388,7 +434,7 @@ function SlideVisual({ slide, fanned }: { slide: (typeof CAROUSEL_SLIDES)[number
     return (
       <div className="flex items-center justify-center">
         <div style={{ borderRadius: "2rem", overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }} className="w-72">
-          <video src={finVideo} autoPlay loop muted playsInline className="w-full" />
+          <video src={finVideo} autoPlay loop muted playsInline preload="none" className="w-full" />
         </div>
       </div>
     );
@@ -581,6 +627,56 @@ function EventModal({ event, onClose }: { event: any; onClose: () => void }) {
   );
 }
 
+function NewsletterStrip() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "duplicate" | "error">("idle");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("loading");
+    try {
+      const result = await api.subscribeNewsletter(email);
+      setStatus(result === "duplicate" ? "duplicate" : "done");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div style={{ backgroundColor: "rgba(30,58,95,0.08)", borderRadius: "1.5rem" }} className="mt-12 px-6 py-8 flex flex-col md:flex-row items-center gap-6">
+      <div className="flex-1 text-center md:text-left">
+        <p style={{ color: NAVY }} className="font-900 text-lg mb-1">Stay in the loop</p>
+        <p style={{ color: NAVY }} className="text-sm font-600 opacity-65">Get notified about new events, challenges, and features — no spam, ever.</p>
+      </div>
+      {status === "done" ? (
+        <p style={{ color: NAVY }} className="font-800 text-sm">✓ Subscribed! We will keep you posted.</p>
+      ) : (
+        <form onSubmit={submit} className="flex gap-2 w-full md:w-auto">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            style={{ backgroundColor: "rgba(255,255,255,0.7)", color: NAVY, borderRadius: "0.75rem", border: "2px solid rgba(30,58,95,0.15)", minWidth: 0 }}
+            className="flex-1 md:w-56 px-4 py-3 text-sm font-600 outline-none"
+          />
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            style={{ backgroundColor: PINK_BTN, color: "white", borderRadius: "0.75rem", whiteSpace: "nowrap" }}
+            className="px-5 py-3 text-sm font-800 hover:opacity-85 transition-opacity disabled:opacity-50"
+          >
+            {status === "loading" ? "…" : "Notify Me"}
+          </button>
+        </form>
+      )}
+      {status === "duplicate" && <p style={{ color: NAVY }} className="text-xs font-700 opacity-60 md:hidden">You are already subscribed!</p>}
+      {status === "error" && <p style={{ color: "#b91c1c" }} className="text-xs font-700 md:hidden">Something went wrong — please try again.</p>}
+    </div>
+  );
+}
+
 function Events() {
   const [events, setEvents] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -613,6 +709,9 @@ function Events() {
             {events.map((e) => <EventCard key={e.id} event={e} onView={setSelected} />)}
           </div>
         )}
+
+        {/* Newsletter strip */}
+        <NewsletterStrip />
       </div>
     </section>
   );
@@ -733,6 +832,9 @@ function Voting() {
           <p style={{ color: NAVY }} className="text-lg font-600 opacity-70 max-w-xl mx-auto">
             Request community-driven features, vote on our upcoming roadmap, and leave your feedback to help us build a better app.
           </p>
+        </div>
+        <div style={{ backgroundColor: "rgba(255,255,255,0.35)", borderRadius: "1rem", borderLeft: `4px solid ${PINK_BTN}` }} className="px-5 py-3.5 mb-6">
+          <p style={{ color: NAVY }} className="text-sm font-800">We build what our users ask for. Vote on what comes next.</p>
         </div>
         <FeatureSubmitForm onSubmitted={load} />
         <div className="flex flex-col gap-3">
@@ -872,7 +974,7 @@ function AdminPanel({ onClose }: { onClose: () => void }) {
   const [isFirstSetup, setIsFirstSetup] = useState(false);
   const [setupPw, setSetupPw] = useState("");
   const [setupConfirm, setSetupConfirm] = useState("");
-  const [tab, setTab] = useState<"features" | "faqs" | "events" | "messages" | "settings">("features");
+  const [tab, setTab] = useState<"features" | "faqs" | "events" | "messages" | "subscribers" | "settings">("features");
 
   // features
   const [features, setFeatures] = useState<any[]>([]);
@@ -886,6 +988,8 @@ function AdminPanel({ onClose }: { onClose: () => void }) {
   const [editEvent, setEditEvent] = useState<any>(null);
   // messages
   const [messages, setMessages] = useState<any[]>([]);
+  const [iosWaitlist, setIosWaitlist] = useState<{ email: string; joinedAt: string }[]>([]);
+  const [newsletter, setNewsletter] = useState<{ email: string; joinedAt: string }[]>([]);
   // change password
   const [cpForm, setCpForm] = useState({ current: "", next: "", confirm: "" });
   const [cpLoading, setCpLoading] = useState(false);
@@ -897,12 +1001,21 @@ function AdminPanel({ onClose }: { onClose: () => void }) {
     } catch { }
   }, []);
 
+  const loadSubscribers = useCallback(async () => {
+    try {
+      const [ios, nl] = await Promise.all([api.getIosWaitlist(), api.getNewsletterSubscribers()]);
+      setIosWaitlist([...ios].reverse());
+      setNewsletter([...nl].reverse());
+    } catch { }
+  }, []);
+
   const loadAll = useCallback(() => {
     api.getPendingFeatures().then(setFeatures).catch(() => { });
     api.getFaqs().then(setFaqs).catch(() => { });
     api.getAllEvents().then(setEvents).catch(() => { });
     loadMessages();
-  }, []);
+    loadSubscribers();
+  }, [loadSubscribers]);
 
   useEffect(() => { if (authed) loadAll(); }, [authed, loadAll]);
 
@@ -1024,7 +1137,8 @@ function AdminPanel({ onClose }: { onClose: () => void }) {
     );
   }
 
-  const tabs: { key: typeof tab; label: string }[] = [{ key: "features", label: "Feature Requests" }, { key: "faqs", label: "FAQs" }, { key: "events", label: "Events" }, { key: "messages", label: `Messages${messages.length ? ` (${messages.length})` : ""}` }, { key: "settings", label: "Settings" }];
+  const subscriberCount = iosWaitlist.length + newsletter.length;
+  const tabs: { key: typeof tab; label: string }[] = [{ key: "features", label: "Feature Requests" }, { key: "faqs", label: "FAQs" }, { key: "events", label: "Events" }, { key: "messages", label: `Messages${messages.length ? ` (${messages.length})` : ""}` }, { key: "subscribers", label: `Subscribers${subscriberCount ? ` (${subscriberCount})` : ""}` }, { key: "settings", label: "Settings" }];
 
   return (
     <div className="fixed inset-0 z-[100] overflow-auto" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
@@ -1151,6 +1265,55 @@ function AdminPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
+        {/* ── Subscribers tab ── */}
+        {tab === "subscribers" && (
+          <div className="flex flex-col gap-8">
+            {/* iOS Waitlist */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 style={{ color: NAVY }} className="font-900 text-base">iOS Waitlist ({iosWaitlist.length})</h3>
+                <button onClick={loadSubscribers} style={{ color: NAVY }} className="text-xs font-700 hover:opacity-70">↻ Refresh</button>
+              </div>
+              {iosWaitlist.length === 0 ? (
+                <p style={{ color: NAVY }} className="opacity-50 font-600 text-sm text-center py-6">No iOS waitlist entries yet.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {iosWaitlist.map((e) => (
+                    <GlassCard key={e.email} className="px-4 py-3 flex items-center justify-between gap-4">
+                      <div>
+                        <p style={{ color: NAVY }} className="font-700 text-sm">{e.email}</p>
+                        <p style={{ color: NAVY }} className="text-xs opacity-40">{new Date(e.joinedAt).toLocaleDateString()}</p>
+                      </div>
+                      <button onClick={async () => { await api.deleteIosWaitlistEntry(e.email); loadSubscribers(); }} style={{ backgroundColor: "#fca5a5", color: "#b91c1c", borderRadius: "0.5rem" }} className="text-xs font-800 px-3 py-1.5 shrink-0">Remove</button>
+                    </GlassCard>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Newsletter */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 style={{ color: NAVY }} className="font-900 text-base">Newsletter ({newsletter.length})</h3>
+              </div>
+              {newsletter.length === 0 ? (
+                <p style={{ color: NAVY }} className="opacity-50 font-600 text-sm text-center py-6">No newsletter subscribers yet.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {newsletter.map((e) => (
+                    <GlassCard key={e.email} className="px-4 py-3 flex items-center justify-between gap-4">
+                      <div>
+                        <p style={{ color: NAVY }} className="font-700 text-sm">{e.email}</p>
+                        <p style={{ color: NAVY }} className="text-xs opacity-40">{new Date(e.joinedAt).toLocaleDateString()}</p>
+                      </div>
+                      <button onClick={async () => { await api.deleteNewsletterSubscriber(e.email); loadSubscribers(); }} style={{ backgroundColor: "#fca5a5", color: "#b91c1c", borderRadius: "0.5rem" }} className="text-xs font-800 px-3 py-1.5 shrink-0">Remove</button>
+                    </GlassCard>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── Settings tab ── */}
         {tab === "settings" && (
           <div className="max-w-md">
@@ -1207,9 +1370,55 @@ function AdminPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ── Sticky mobile CTA ────────────────────────────────────────────────────────
+function StickyMobileCTA({ heroRef }: { heroRef: React.RefObject<HTMLElement | null> }) {
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem("cta_dismissed") === "1");
+
+  useEffect(() => {
+    if (dismissed) return;
+    const el = heroRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), { threshold: 0 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [dismissed, heroRef]);
+
+  const dismiss = () => {
+    sessionStorage.setItem("cta_dismissed", "1");
+    setDismissed(true);
+  };
+
+  if (dismissed || !visible) return null;
+
+  return (
+    <div
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3"
+      style={{
+        backgroundColor: NAVY,
+        boxShadow: "0 -4px 24px rgba(0,0,0,0.22)",
+        animation: "slideUpCTA 0.35s cubic-bezier(0.34,1.1,0.64,1) both",
+      }}
+    >
+      <a
+        href="https://play.google.com/store/apps/details?id=com.anyahuru.wordwave"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ backgroundColor: PINK_BTN, color: "white", borderRadius: "0.75rem" }}
+        className="flex-1 flex items-center justify-center gap-2 py-3 font-800 text-sm hover:opacity-90 transition-opacity"
+      >
+        <img src={googlePlayIcon} alt="" className="w-4 h-4 object-contain" />
+        Download on Google Play
+      </a>
+      <button onClick={dismiss} style={{ color: "rgba(255,255,255,0.6)" }} className="text-xl leading-none px-1 hover:text-white transition-colors" aria-label="Dismiss">×</button>
+    </div>
+  );
+}
+
 // ── App root ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [adminOpen, setAdminOpen] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const check = () => {
@@ -1236,13 +1445,14 @@ export default function App() {
     <div style={{ backgroundColor: BG, minHeight: "100vh", fontFamily: "'Nunito', sans-serif" }}>
       <ToastHost />
       <Navbar />
-      <Hero />
+      <Hero sectionRef={heroRef} />
       <HowWeHelp />
       <Features />
       <Events />
       <Voting />
       <FAQ />
       <Contact />
+      <StickyMobileCTA heroRef={heroRef} />
       {adminOpen && <AdminPanel onClose={closeAdmin} />}
     </div>
   );

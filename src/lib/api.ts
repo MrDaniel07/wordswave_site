@@ -174,6 +174,42 @@ export async function deleteMessage(id: string) {
   await kvSet("contact_messages", list.filter((m) => m.id !== id));
 }
 
+// ── iOS WAITLIST ──────────────────────────────────────────────────────────────
+export async function addIosWaitlist(email: string): Promise<"ok" | "duplicate"> {
+  const list: { email: string; joinedAt: string }[] = (await kvGet("ios_waitlist")) ?? [];
+  if (list.some((e) => e.email.toLowerCase() === email.toLowerCase())) return "duplicate";
+  list.push({ email, joinedAt: new Date().toISOString() });
+  await kvSet("ios_waitlist", list);
+  return "ok";
+}
+
+export async function getIosWaitlist(): Promise<{ email: string; joinedAt: string }[]> {
+  return (await kvGet("ios_waitlist")) ?? [];
+}
+
+export async function deleteIosWaitlistEntry(email: string): Promise<void> {
+  const list: { email: string; joinedAt: string }[] = (await kvGet("ios_waitlist")) ?? [];
+  await kvSet("ios_waitlist", list.filter((e) => e.email !== email));
+}
+
+// ── NEWSLETTER ────────────────────────────────────────────────────────────────
+export async function subscribeNewsletter(email: string): Promise<"ok" | "duplicate"> {
+  const list: { email: string; joinedAt: string }[] = (await kvGet("newsletter_subscribers")) ?? [];
+  if (list.some((e) => e.email.toLowerCase() === email.toLowerCase())) return "duplicate";
+  list.push({ email, joinedAt: new Date().toISOString() });
+  await kvSet("newsletter_subscribers", list);
+  return "ok";
+}
+
+export async function getNewsletterSubscribers(): Promise<{ email: string; joinedAt: string }[]> {
+  return (await kvGet("newsletter_subscribers")) ?? [];
+}
+
+export async function deleteNewsletterSubscriber(email: string): Promise<void> {
+  const list: { email: string; joinedAt: string }[] = (await kvGet("newsletter_subscribers")) ?? [];
+  await kvSet("newsletter_subscribers", list.filter((e) => e.email !== email));
+}
+
 // ── ADMIN PASSWORD ────────────────────────────────────────────────────────────
 export async function getAdminPassword(): Promise<string | null> {
   try {
