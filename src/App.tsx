@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import appIcon from "@/imports/icon-.png";
 import leadImage from "@/imports/Lead.png";
 import googlePlayIcon from "@/imports/image.png";
+import calendarImage from "@/imports/calender.png";
 import finVideo from "@/imports/watermark-removed-remove_the_additional_fin_on_t.mp4";
 import imgQuizScreen from "@/imports/quiz.png";
 import imgStreakScreen from "@/imports/streak.png";
@@ -690,17 +691,15 @@ function Events() {
     <section id="events" style={{ backgroundColor: BG }} className="py-20 px-4">
       {selected && <EventModal event={selected} onClose={() => setSelected(null)} />}
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-1">
           <h2 style={{ color: NAVY }} className="text-3xl md:text-4xl font-900 mb-3">Live Events & Challenges</h2>
           <p style={{ color: NAVY }} className="text-lg font-600 opacity-70">Stay sharp and compete with the WordsWave community.</p>
         </div>
         {!loaded ? (
-          <p style={{ color: NAVY }} className="text-center font-700 opacity-50 py-12">Loading events…</p>
+          <p style={{ color: NAVY }} className="text-center font-700 opacity-50 py-8">Loading events…</p>
         ) : events.length === 0 ? (
-          <div className="text-center py-16">
-            <div style={{ background: "linear-gradient(135deg,#c7deff,#fadadd)", borderRadius: "2rem" }} className="inline-flex items-center justify-center w-20 h-20 mb-4">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(30,58,95,0.4)" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 2v3M16 2v3M3 10h18" /></svg>
-            </div>
+          <div className="text-center py-0">
+            <img src={calendarImage} alt="Calendar" className="mx-auto mb-1 block w-120 h-120 object-contain" />
             <p style={{ color: NAVY }} className="font-800 text-lg opacity-60">No events right now</p>
             <p style={{ color: NAVY }} className="text-sm font-600 opacity-40 mt-1">Check back soon for upcoming challenges!</p>
           </div>
