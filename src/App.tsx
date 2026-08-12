@@ -177,47 +177,107 @@ function Hero() {
   );
 }
 
-// ── Meet Fin ──────────────────────────────────────────────────────────────────
-function MeetFin() {
+// ── How WordsWave Helps You ───────────────────────────────────────────────────
+const BENEFITS = [
+  {
+    title: "Grow Your Vocabulary Every Day",
+    desc: "A carefully chosen word lands in your app daily — complete with its definition, phonetic pronunciation, and real-world usage examples. Consistent daily exposure is the fastest proven path to a larger vocabulary.",
+  },
+  {
+    title: "Test, Retain, and Never Forget",
+    desc: "Multiple quiz formats push words from short-term exposure into long-term memory. Each quiz session reinforces what you have already learned, ensuring new words actually stick rather than fading within days.",
+  },
+  {
+    title: "Turn Learning Into a Non-Negotiable Habit",
+    desc: "Streak tracking rewards you for showing up every day. Missing a day resets your count, creating the right amount of healthy pressure to make vocabulary practice as automatic as brushing your teeth.",
+  },
+  {
+    title: "Stay Motivated Through Milestones and Competition",
+    desc: "Global leaderboards show how you rank against learners worldwide, while achievement badges — earned for streaks, quiz mastery, and more — give you visible proof of real progress at every stage.",
+  },
+  {
+    title: "Fit Learning Into Any Schedule",
+    desc: "Sessions are designed to be completed in just a few focused minutes. Whether you are on a commute, on a lunch break, or winding down at night, WordsWave fits your day rather than competing with it.",
+  },
+  {
+    title: "Speak and Write at a Higher Level",
+    desc: "A broader vocabulary directly sharpens how you communicate — in job interviews, professional emails, academic essays, and everyday conversations. WordsWave builds the language skills that open real doors.",
+  },
+  {
+    title: "See Your Growth at a Glance",
+    desc: "Your personal profile tracks streaks, badges earned, and ranking history in one place. Watching those numbers grow over weeks and months is one of the most powerful motivators to keep going.",
+  },
+  {
+    title: "Works for Every Type of Learner",
+    desc: "A student building foundational vocabulary, a professional refining business language, or a non-native speaker expanding their English — WordsWave adapts to where you are and moves with you as you improve.",
+  },
+  {
+    title: "Always Fresh, Always Engaging",
+    desc: "Seasonal events, community challenges, and a gamified learning loop mean there is always a reason to open the app. Your learning never plateaus — and it never feels like a chore.",
+  },
+];
+
+function HowWeHelp() {
+  const rows = [BENEFITS.slice(0, 3), BENEFITS.slice(3, 6), BENEFITS.slice(6, 9)];
+  const [visible, setVisible] = useState([false, false, false]);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const observers = rows.map((_, i) => {
+      const el = rowRefs.current[i];
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisible((v) => { const n = [...v]; n[i] = true; return n; });
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.15 }
+      );
+      obs.observe(el);
+      return obs;
+    });
+    return () => observers.forEach((o) => o?.disconnect());
+  }, []);
+
   return (
-    <section style={{ backgroundColor: "rgba(255,255,255,0.18)" }} className="py-20 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Fin video */}
-          <div className="flex justify-center">
-            <div style={{ borderRadius: "2rem", overflow: "hidden" }} className="shadow-xl w-72">
-              <video
-                src={finVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-          {/* Text side */}
-          <div>
-            <h2 style={{ color: NAVY, lineHeight: 1.2 }} className="text-3xl md:text-4xl font-900 mb-4">
-              Meet Fin — Your Dolphin Learning Companion
-            </h2>
-            <p style={{ color: NAVY }} className="text-base font-600 opacity-75 leading-relaxed mb-5">
-              Fin is more than a mascot — he's your personal cheerleader inside WordsWave. As you complete daily vocabulary goals, unlock achievements, and build your streaks, Fin will be there every step of the way to celebrate your progress and keep you motivated.
-            </p>
-            <ul className="flex flex-col gap-2.5">
-              {[
-                "Celebrates every milestone you hit",
-                "Cheers you on to keep your streak alive",
-                "Guides you through achievements and challenges",
-                "Gives friendly tips to boost your vocabulary faster",
-              ].map((text) => (
-                <li key={text} className="flex items-start gap-2.5">
-                  <span style={{ color: NAVY }} className="mt-1 text-xs opacity-50">•</span>
-                  <span style={{ color: NAVY }} className="text-sm font-700">{text}</span>
-                </li>
+    <section style={{ backgroundColor: "rgba(255,255,255,0.15)" }} className="py-20 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 style={{ color: NAVY }} className="text-3xl md:text-4xl font-900 mb-3">
+            How WordsWave Helps You
+          </h2>
+          <p style={{ color: NAVY }} className="text-lg font-600 opacity-70 max-w-2xl mx-auto leading-relaxed">
+            More than an app — a complete vocabulary growth system designed around how people actually learn and retain new words.
+          </p>
+        </div>
+        <div className="flex flex-col gap-5">
+          {rows.map((row, rowIdx) => (
+            <div
+              key={rowIdx}
+              ref={(el) => { rowRefs.current[rowIdx] = el; }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            >
+              {row.map((b, cardIdx) => (
+                <div
+                  key={b.title}
+                  style={{
+                    backgroundColor: CARD,
+                    borderRadius: "1.5rem",
+                    opacity: visible[rowIdx] ? 1 : 0,
+                    transform: visible[rowIdx] ? "translateY(0)" : "translateY(36px)",
+                    transition: `opacity 0.55s ease-out ${cardIdx * 0.13}s, transform 0.55s ease-out ${cardIdx * 0.13}s`,
+                  }}
+                  className="p-6 flex flex-col gap-2.5 shadow-sm"
+                >
+                  <h3 style={{ color: NAVY, fontSize: "1.05rem", fontWeight: 900, lineHeight: 1.3 }}>{b.title}</h3>
+                  <div style={{ width: 32, height: 3, backgroundColor: PINK_BTN, borderRadius: 2 }} />
+                  <p style={{ color: NAVY }} className="text-sm font-600 opacity-70 leading-relaxed">{b.desc}</p>
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -230,6 +290,7 @@ const CAROUSEL_SLIDES = [
   { title: "Quiz System", desc: "Multiple quiz types to test and sharpen your vocabulary knowledge.", visual: "phone" as const },
   { title: "Streak Tracking", desc: "Build consistency with daily streak counters. Keep the flame alive!", visual: "phone" as const },
   { title: "Leaderboards & Profiles", desc: "Competitive rankings, customizable avatars, and achievement badges.", visual: "leaderboard" as const },
+  { title: "Meet Fin", desc: "Fin is your personal dolphin guide — he celebrates every milestone, cheers you on to keep your streak alive, and gives friendly tips to boost your vocabulary faster.", visual: "video" as const },
 ];
 
 function HeartOutline() {
@@ -320,6 +381,15 @@ function SlideVisual({ slide, fanned }: { slide: (typeof CAROUSEL_SLIDES)[number
     return (
       <div className="flex items-center justify-center" style={{ height: 280 }}>
         <img src={imgLeaderboard} alt="Leaderboards and profiles" style={{ height: 272, width: "auto", objectFit: "contain", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18))" }} />
+      </div>
+    );
+  }
+  if (slide.visual === "video") {
+    return (
+      <div className="flex items-center justify-center">
+        <div style={{ borderRadius: "2rem", overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }} className="w-72">
+          <video src={finVideo} autoPlay loop muted playsInline className="w-full" />
+        </div>
       </div>
     );
   }
@@ -1167,11 +1237,11 @@ export default function App() {
       <ToastHost />
       <Navbar />
       <Hero />
-      <MeetFin />
+      <HowWeHelp />
       <Features />
-      <FAQ />
       <Events />
       <Voting />
+      <FAQ />
       <Contact />
       {adminOpen && <AdminPanel onClose={closeAdmin} />}
     </div>
